@@ -7,13 +7,21 @@ fn main() {
     let lib_name = "libpulse-simple";
     let fallback_name = {
         #[cfg(target_os = "linux")]
-        { "pulse-simple::libpulse-simple.so.0" }
+        {
+            "pulse-simple::libpulse-simple.so.0"
+        }
         #[cfg(target_os = "macos")]
-        { "pulse-simple::libpulse-simple.0.dylib" }
+        {
+            "pulse-simple::dylib:-as-needed=pulse-simple"
+        }
         #[cfg(windows)]
-        { "pulse-simple::libpulse-simple-0.dll" }
+        {
+            "pulse-simple::libpulse-simple-0.dll"
+        }
         #[cfg(not(any(target_os = "linux", target_os = "macos", windows)))]
-        { "pulse-simple" }
+        {
+            "pulse-simple"
+        }
     };
     let min_version = "4.0";
 
@@ -30,13 +38,12 @@ fn main() {
             println!("cargo:warning=Pkg-config seems to not know about PulseAudio (dev package not installed?), \
                        trying generic fallback...");
             true
-        },
+        }
         // Also allow fallback if pkg-config not installed, or disabled
-        Err(pkg_config::Error::EnvNoPkgConfig(_)) |
-        Err(pkg_config::Error::Command { .. }) => {
+        Err(pkg_config::Error::EnvNoPkgConfig(_)) | Err(pkg_config::Error::Command { .. }) => {
             println!("cargo:warning=No pkg-config or disabled, trying generic fallback...");
             true
-        },
+        }
         // In all other cases we will perform a version-specfic check and honor the result
         _ => false,
     };
@@ -49,15 +56,14 @@ fn main() {
         return;
     }
 
-    config.cargo_metadata(true)
-          .atleast_version(min_version);
+    config.cargo_metadata(true).atleast_version(min_version);
 
     // Do version specific pkg-config check and honor result
     match config.probe(lib_name) {
         Err(e) => {
             println!("cargo:warning={}", e);
             std::process::exit(1);
-        },
-        Ok(_) => {},
+        }
+        Ok(_) => {}
     }
 }
