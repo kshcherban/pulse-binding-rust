@@ -12,7 +12,7 @@ fn main() {
         }
         #[cfg(target_os = "macos")]
         {
-            "pulse-simple::dylib:-as-needed=pulse-simple"
+            "dylib:-as-needed=pulse-simple"
         }
         #[cfg(windows)]
         {
